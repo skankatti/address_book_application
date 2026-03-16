@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from app.models.address_model import Address
 from app.schemas.address_schema import AddressCreate
+from app.utils.distance_calculator import calculate_distance
+
 
 
 def create_address(db: Session, address: AddressCreate):
@@ -41,3 +43,22 @@ def delete_address(db: Session, address_id: int):
     db.commit()
 
     return True
+
+def get_addresses_within_distance(db: Session, lat, lon, distance):
+    addresses = db.query(Address).all()
+
+    result = []
+
+    for addr in addresses:
+        dist = calculate_distance(lat, lon, addr.latitude, addr.longitude)
+
+        if dist <= distance:
+            result.append(addr)
+
+    return result
+
+def get_all_addresses(db: Session):
+
+    addresses = db.query(Address).all()
+
+    return addresses

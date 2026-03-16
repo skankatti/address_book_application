@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.schemas.address_schema import AddressCreate, AddressResponse
-from app.services.address_service import create_address, update_address, delete_address
+from app.services.address_service import create_address, update_address, delete_address, get_addresses_within_distance,get_all_addresses
 
 
 router = APIRouter(
@@ -45,3 +45,14 @@ def delete(address_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Address not found")
 
     return {"message": "Address deleted"}
+
+@router.get("/nearby")
+def nearby(lat: float, lon: float, distance: float, db: Session = Depends(get_db)):
+    return get_addresses_within_distance(db, lat, lon, distance)
+
+@router.get("/", response_model=list[AddressResponse])
+def get_all(db: Session = Depends(get_db)):
+
+    addresses = get_all_addresses(db)
+
+    return addresses
